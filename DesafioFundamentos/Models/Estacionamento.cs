@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace DesafioFundamentos.Models
 {
     public class Estacionamento
@@ -5,6 +7,7 @@ namespace DesafioFundamentos.Models
         private decimal precoInicial = 0;
         private decimal precoPorHora = 0;
         private List<string> veiculos = new List<string>();
+        private const string Pattern = @"[A-Z]{3}[0-9][0-9A-Z][0-9]{2}";
 
         public Estacionamento(decimal precoInicial, decimal precoPorHora)
         {
@@ -14,34 +17,77 @@ namespace DesafioFundamentos.Models
 
         public void AdicionarVeiculo()
         {
-            // TODO: Pedir para o usuário digitar uma placa (ReadLine) e adicionar na lista "veiculos"
-            // *IMPLEMENTE AQUI*
             Console.WriteLine("Digite a placa do veículo para estacionar:");
+            string plate = Console.ReadLine();
+            plate = (plate.Length == 8) ? plate.Replace("-", "") : plate;
+            plate = plate.ToUpper();
+            Regex regex = new Regex(Pattern);
+            if (regex.IsMatch(plate) && plate.Length > 0)
+            {
+                veiculos.Add(plate);
+                Console.WriteLine($"Veículo {plate} adicionado com sucesso!");
+            }else if(plate.Length == 0)
+            {
+                Console.WriteLine("Falha ao adicionar veículo!");
+                Console.WriteLine("Erro: Placa não pode ser vazia!");
+            }
+            else
+            {
+                Console.WriteLine("Falha ao adicionar veículo!");
+                Console.WriteLine($"Erro: Placa {plate} inválida!");
+            }
         }
 
         public void RemoverVeiculo()
         {
             Console.WriteLine("Digite a placa do veículo para remover:");
-
-            // Pedir para o usuário digitar a placa e armazenar na variável placa
-            // *IMPLEMENTE AQUI*
-            string placa = "";
-
-            // Verifica se o veículo existe
-            if (veiculos.Any(x => x.ToUpper() == placa.ToUpper()))
+            string plate = Console.ReadLine();
+            plate = (plate.Length == 8) ? plate.Replace("-", "") : plate;
+            plate = plate.ToUpper();
+            Regex regex = new Regex(Pattern);
+            bool isRemoved = false;
+            if (regex.IsMatch(plate) && (veiculos.Any(x => x.ToUpper() == plate.ToUpper())))
             {
-                Console.WriteLine("Digite a quantidade de horas que o veículo permaneceu estacionado:");
-
-                // TODO: Pedir para o usuário digitar a quantidade de horas que o veículo permaneceu estacionado,
-                // TODO: Realizar o seguinte cálculo: "precoInicial + precoPorHora * horas" para a variável valorTotal                
-                // *IMPLEMENTE AQUI*
+                Console.WriteLine("Digite a quantidade de horas que o veículo permaneceu estacionado:");            
                 int horas = 0;
-                decimal valorTotal = 0; 
+                decimal valorTotal = 0;
+                try
+                {
+                    string horasString = Console.ReadLine();
+                    if (horasString.Length > 0)
+                    {
+                        if (horasString.All(Char.IsDigit))
+                        {
+                            horas = Convert.ToInt32(horasString);
+                            valorTotal = precoPorHora * horas + precoInicial;
+                            veiculos.Remove(plate);
+                            isRemoved = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Erro: Horas inválidas!");
+                        }
+                    }else if(horasString.Length == 0)
+                    {
+                        Console.WriteLine("Erro: Horas não podem ser vazias!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Erro: Horas inválidas!");
+                    }
 
-                // TODO: Remover a placa digitada da lista de veículos
-                // *IMPLEMENTE AQUI*
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Erro ao calcular o valor total");
+                }
 
-                Console.WriteLine($"O veículo {placa} foi removido e o preço total foi de: R$ {valorTotal}");
+                if (isRemoved)
+                {
+                    Console.WriteLine($"O veículo {plate} foi removido e o preço total foi de: R$ {valorTotal}");
+                }
+                
             }
             else
             {
@@ -51,12 +97,13 @@ namespace DesafioFundamentos.Models
 
         public void ListarVeiculos()
         {
-            // Verifica se há veículos no estacionamento
             if (veiculos.Any())
             {
                 Console.WriteLine("Os veículos estacionados são:");
-                // TODO: Realizar um laço de repetição, exibindo os veículos estacionados
-                // *IMPLEMENTE AQUI*
+                foreach(var veiculo in veiculos)
+                {
+                    Console.WriteLine(veiculo);
+                }
             }
             else
             {
